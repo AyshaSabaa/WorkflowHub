@@ -1,0 +1,345 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ActivityAction {
+  LOGIN
+  LOGOUT
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_DELETED
+  TASK_MOVED
+  TASK_ASSIGNED
+  STATUS_CHANGED
+  COMMENT_ADDED
+  ATTACHMENT_ADDED
+  BOARD_CREATED
+  BOARD_UPDATED
+  BOARD_DELETED
+  COLUMN_CREATED
+  COLUMN_UPDATED
+  COLUMN_DELETED
+  COLUMN_REORDERED
+  USER_CREATED
+  USER_UPDATED
+  TEAM_CREATED
+  TEAM_UPDATED
+}
+
+enum NotificationType {
+  ASSIGNMENT
+  MENTION
+  DUE_DATE
+  STATUS_CHANGE
+  ESCALATION
+  COMMENT
+  SYSTEM
+}
+
+enum AutomationTrigger {
+  TASK_CREATED
+  STATUS_CHANGED
+  DUE_DATE_APPROACHING
+  OVERDUE
+}
+
+enum AutomationAction {
+  ASSIGN_USER
+  SEND_NOTIFICATION
+  SEND_EMAIL
+  CHANGE_STATUS
+  ESCALATE
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  avatar       String?
+  role         UserRole @default(EMPLOYEE)
+  department   String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  teamMemberships TeamMember[]
+  assignedTasks   Task[]         @relation("TaskAssignee")
+  createdTasks    Task[]         @relation("TaskCreator")
+  comments        Comment[]
+  activityLogs    ActivityLog[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+  savedFilters    SavedFilter[]
+  attachments     Attachment[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  department  String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members TeamMember[]
+  boards  Board[]
+  tasks   Task[]
+
+  @@index([department])
+}
+
+model TeamMember {
+  id     String   @id @default(cuid())
+  teamId String
+  userId String
+  role   UserRole @default(EMPLOYEE)
+
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+}
+
+model Board {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  department  String
+  teamId      String?
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team    Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  columns Column[]
+  tasks   Task[]
+
+  @@index([department])
+  @@index([isArchived])
+}
+
+model Column {
+  id        String   @id @default(cuid())
+  boardId   String
+  name      String
+  slug      String?
+  color     String   @default("#6366f1")
+  position  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  tasks Task[]
+
+  @@index([boardId, position])
+  @@index([boardId, slug])
+}
+
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  priority    Priority  @default(MEDIUM)
+  status      String
+  boardId     String
+  columnId    String
+  assigneeId  String?
+  teamId      String?
+  creatorId   String
+  dueDate     DateTime?
+  amount      Int?
+  customer    String?
+  position    Int       @default(0)
+  isArchived  Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  board        Board         @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  column       Column        @relation(fields: [columnId], references: [id])
+  assignee     User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  creator      User          @relation("TaskCreator", fields: [creatorId], references: [id])
+  team         Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  comments     Comment[]
+  attachments  Attachment[]
+  activityLogs ActivityLog[]
+  tags         TaskTag[]
+
+  @@index([boardId, columnId])
+  @@index([assigneeId])
+  @@index([priority])
+  @@index([dueDate])
+  @@index([isArchived])
+}
+
+model Tag {
+  id    String @id @default(cuid())
+  name  String @unique
+  color String @default("#94a3b8")
+
+  tasks TaskTag[]
+}
+
+model TaskTag {
+  taskId String
+  tagId  String
+
+  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, tagId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  content   String
+  mentions  Json      @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  task   Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+
+  @@index([taskId])
+}
+
+model Attachment {
+  id          String   @id @default(cuid())
+  taskId      String
+  uploaderId  String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  storagePath String
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  task     Task                @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  uploader User                @relation(fields: [uploaderId], references: [id])
+  versions AttachmentVersion[]
+
+  @@index([taskId])
+}
+
+model AttachmentVersion {
+  id           String   @id @default(cuid())
+  attachmentId String
+  version      Int
+  storagePath  String
+  fileSize     Int
+  uploadedAt   DateTime @default(now())
+
+  attachment Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id        String         @id @default(cuid())
+  taskId    String?
+  userId    String
+  action    ActivityAction
+  message   String
+  metadata  Json?
+  createdAt DateTime       @default(now())
+
+  task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id])
+
+  @@index([taskId])
+  @@index([createdAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model SavedFilter {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  filters   Json
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AutomationRule {
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  boardId     String?
+  trigger     AutomationTrigger
+  action      AutomationAction
+  conditions  Json
+  config      Json
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([boardId])
+  @@index([isActive])
+}
+
+model CompanySettings {
+  id        String   @id @default("default")
+  name      String   @default("WorkflowHub")
+  logo      String?
+  timezone  String   @default("UTC")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
