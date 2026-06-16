@@ -52,12 +52,14 @@ export default function BoardDetailPage() {
   const isPipeline = board?.name.toLowerCase().includes("pipeline") || board?.department === "Sales";
   const dealLabel = isPipeline ? "Deal" : "Task";
 
-  const loadBoard = useCallback(() => {
-    setLoading(true);
+  const loadBoard = useCallback((options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
     api.getBoard(boardId).then((d) => {
       const b = (d as { board: { id: string; name: string; department: string; columns: { id: string; name: string; color: string; tasks: ColumnData["tasks"] }[] } }).board;
       setBoard({ ...b, columns: b.columns.map((c) => ({ id: c.id, name: c.name, slug: (c as { slug?: string }).slug, color: c.color, tasks: c.tasks || [] })) });
-    }).catch(() => toast.error("Failed to load board")).finally(() => setLoading(false));
+    }).catch(() => toast.error("Failed to load board")).finally(() => {
+      if (!options?.silent) setLoading(false);
+    });
   }, [boardId]);
 
   useEffect(() => { loadBoard(); api.getUsers().then((d) => setUsers((d as { users: typeof users }).users)).catch(() => {}); }, [loadBoard]);
@@ -215,13 +217,13 @@ export default function BoardDetailPage() {
             onTaskDuplicate={handleDuplicateTask}
             onTaskDelete={setTaskToDelete}
             onAddTask={(colId) => { setNewTaskColumn(colId); setShowNewTask(true); }}
-            onColumnsChange={loadBoard}
+            onColumnsChange={() => loadBoard({ silent: true })}
           />
         )}
       </div>
       </div>
 
-      <TaskDetailDialog taskId={selectedTask} open={!!selectedTask} onClose={() => setSelectedTask(null)} onUpdate={loadBoard} isDeal={isPipeline} />
+      <TaskDetailDialog taskId={selectedTask} open={!!selectedTask} onClose={() => setSelectedTask(null)} onUpdate={() => loadBoard({ silent: true })} isDeal={isPipeline} />
 
       <Dialog open={showNewTask} onOpenChange={setShowNewTask}>
         <DialogContent>

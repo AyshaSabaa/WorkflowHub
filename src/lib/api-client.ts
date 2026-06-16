@@ -49,6 +49,7 @@ class ApiClient {
     return this.fetch<{ user: AuthUser; token: string }>("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) });
   }
   me() { return this.fetch<{ user: AuthUser }>("/auth/me"); }
+  syncSession() { return this.fetch<{ success: boolean }>("/auth/session", { method: "POST" }); }
   logout() { return this.fetch("/auth/logout", { method: "POST" }); }
 
   getDashboard() { return this.fetch("/dashboard"); }

@@ -66,7 +66,7 @@ export function TaskDetailDialog({
         .catch(() => toast.error(`Failed to load ${label.toLowerCase()}`))
         .finally(() => setLoading(false));
     }
-  }, [open, taskId, label]);
+  }, [open, taskId, isDeal]);
 
   const updateField = async (field: string, value: unknown) => {
     if (!task) return;

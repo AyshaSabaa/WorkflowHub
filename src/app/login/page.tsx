@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Logo, APP_NAME } from "@/components/brand/logo";
@@ -17,11 +17,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const redirecting = useRef(false);
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace("/dashboard");
+    if (loading || !user) {
+      redirecting.current = false;
+      return;
     }
+    if (redirecting.current) return;
+    redirecting.current = true;
+    if (process.env.NODE_ENV === "development") {
+      console.log("[LoginPage] authenticated → /dashboard");
+    }
+    router.replace("/dashboard");
   }, [user, loading, router]);
 
   if (!loading && user) return null;

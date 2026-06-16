@@ -22,7 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       api.setToken(token);
       api.me()
-        .then(({ user }) => setUser(user))
+        .then(({ user }) => {
+          setUser(user);
+          return api.syncSession().catch(() => {});
+        })
         .catch(() => {
           api.setToken(null);
         })
@@ -36,6 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { user, token } = await api.login(email, password);
     api.setToken(token);
     setUser(user);
+    await api.syncSession().catch(() => {});
   }, []);
 
   const logout = useCallback(async () => {

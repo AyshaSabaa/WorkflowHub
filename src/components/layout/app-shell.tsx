@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import { Logo, APP_NAME } from "@/components/brand/logo";
@@ -9,9 +9,19 @@ import { Sidebar } from "./sidebar";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const redirecting = useRef(false);
 
   useEffect(() => {
-    if (!loading && !user) router.replace("/login");
+    if (loading || user) {
+      redirecting.current = false;
+      return;
+    }
+    if (redirecting.current) return;
+    redirecting.current = true;
+    if (process.env.NODE_ENV === "development") {
+      console.log("[AppShell] unauthenticated → /login");
+    }
+    router.replace("/login");
   }, [user, loading, router]);
 
   if (loading) {
