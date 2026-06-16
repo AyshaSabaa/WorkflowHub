@@ -1,19 +1,14 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
-import { taskSchema } from "@/lib/validations";
+import { taskUpdateSchema } from "@/lib/validations";
 import { PERMISSIONS, canDeleteTask } from "@/lib/permissions";
 import { jsonOk, jsonError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit";
 import { logActivity, createNotification } from "@/lib/activity";
-import { z } from "zod";
+import { Prisma } from "@prisma/client";
 
 type Params = { params: Promise<{ taskId: string }> };
-
-const updateSchema = taskSchema.partial().extend({
-  isArchived: z.boolean().optional(),
-  tagIds: z.array(z.string()).optional(),
-});
 
 export async function GET(req: NextRequest, { params }: Params) {
   try {
@@ -48,19 +43,35 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (!PERMISSIONS.canEditTasks(user.role)) return jsonError("Forbidden", 403);
 
     const { taskId } = await params;
-    const data = updateSchema.parse(await req.json());
+    const data = taskUpdateSchema.parse(await req.json());
     const existing = await prisma.task.findUnique({ where: { id: taskId } });
     if (!existing) return jsonError("Task not found", 404);
 
-    const { tagIds, dueDate, boardId, columnId, ...rest } = data;
+    const updateData: Prisma.TaskUpdateInput = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.priority !== undefined) updateData.priority = data.priority;
+    if (data.assigneeId !== undefined) {
+      updateData.assignee = data.assigneeId ? { connect: { id: data.assigneeId } } : { disconnect: true };
+    }
+    if (data.teamId !== undefined) {
+      updateData.team = data.teamId ? { connect: { id: data.teamId } } : { disconnect: true };
+    }
+    if (data.amount !== undefined) updateData.amount = data.amount;
+    if (data.customer !== undefined) updateData.customer = data.customer;
+    if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
+    if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+    if (data.tagIds !== undefined) {
+      updateData.tags = { deleteMany: {}, create: data.tagIds.map((tagId) => ({ tagId })) };
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return jsonError("No fields to update", 400);
+    }
 
     const task = await prisma.task.update({
       where: { id: taskId },
-      data: {
-        ...rest,
-        ...(dueDate !== undefined ? { dueDate: dueDate ? new Date(dueDate) : null } : {}),
-        ...(tagIds ? { tags: { deleteMany: {}, create: tagIds.map((tagId) => ({ tagId })) } } : {}),
-      },
+      data: updateData,
       include: {
         assignee: { select: { id: true, name: true, avatar: true } },
         column: true,

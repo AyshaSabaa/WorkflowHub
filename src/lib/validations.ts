@@ -45,6 +45,20 @@ export const taskSchema = z.object({
   tagIds: z.array(z.string()).optional(),
 });
 
+/** PATCH body for task/deal updates — nullable fields match Prisma optional columns. */
+export const taskUpdateSchema = z.object({
+  title: z.string().min(1).optional(),
+  description: z.string().nullable().optional(),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
+  assigneeId: z.string().nullable().optional(),
+  teamId: z.string().nullable().optional(),
+  dueDate: z.string().nullable().optional(),
+  amount: z.number().int().nonnegative().nullable().optional(),
+  customer: z.string().nullable().optional(),
+  isArchived: z.boolean().optional(),
+  tagIds: z.array(z.string()).optional(),
+});
+
 export const moveTaskSchema = z.object({
   columnId: z.string(),
   position: z.number().int().min(0),

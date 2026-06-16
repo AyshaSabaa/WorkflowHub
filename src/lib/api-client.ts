@@ -27,7 +27,7 @@ class ApiClient {
 
     let res: Response;
     try {
-      res = await fetch(`/api${path}`, { ...options, headers });
+      res = await fetch(`/api${path}`, { ...options, headers, cache: "no-store" });
     } catch {
       throw new Error("Unable to connect to server");
     }

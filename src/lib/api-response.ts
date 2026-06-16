@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { AuthError } from "./auth";
 import { ZodError } from "zod";
 
+const NO_CACHE = { "Cache-Control": "no-store, no-cache, must-revalidate" };
+
 export function jsonOk<T>(data: T, status = 200) {
-  return NextResponse.json(data, { status });
+  return NextResponse.json(data, { status, headers: NO_CACHE });
 }
 
 export function jsonError(message: string, status = 400) {
