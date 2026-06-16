@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api-client";
 import { PRIORITY_CONFIG, formatDate } from "@/lib/utils";
 import { Search, Filter, Save, Download } from "lucide-react";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 import { toast } from "sonner";
 
 interface TaskRow {

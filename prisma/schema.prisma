@@ -3,79 +3,17 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  MANAGER
-  EMPLOYEE
-}
-
-enum Priority {
-  LOW
-  MEDIUM
-  HIGH
-  CRITICAL
-}
-
-enum ActivityAction {
-  LOGIN
-  LOGOUT
-  TASK_CREATED
-  TASK_UPDATED
-  TASK_DELETED
-  TASK_MOVED
-  TASK_ASSIGNED
-  STATUS_CHANGED
-  COMMENT_ADDED
-  ATTACHMENT_ADDED
-  BOARD_CREATED
-  BOARD_UPDATED
-  BOARD_DELETED
-  COLUMN_CREATED
-  COLUMN_UPDATED
-  COLUMN_DELETED
-  COLUMN_REORDERED
-  USER_CREATED
-  USER_UPDATED
-  TEAM_CREATED
-  TEAM_UPDATED
-}
-
-enum NotificationType {
-  ASSIGNMENT
-  MENTION
-  DUE_DATE
-  STATUS_CHANGE
-  ESCALATION
-  COMMENT
-  SYSTEM
-}
-
-enum AutomationTrigger {
-  TASK_CREATED
-  STATUS_CHANGED
-  DUE_DATE_APPROACHING
-  OVERDUE
-}
-
-enum AutomationAction {
-  ASSIGN_USER
-  SEND_NOTIFICATION
-  SEND_EMAIL
-  CHANGE_STATUS
-  ESCALATE
-}
-
 model User {
-  id           String   @id @default(cuid())
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
   email        String   @unique
   passwordHash String
   name         String
   avatar       String?
-  role         UserRole @default(EMPLOYEE)
+  role         String   @default("EMPLOYEE")
   department   String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -91,12 +29,11 @@ model User {
   savedFilters    SavedFilter[]
   attachments     Attachment[]
 
-  @@index([email])
   @@index([role])
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   department  String
   description String?
@@ -111,10 +48,10 @@ model Team {
 }
 
 model TeamMember {
-  id     String   @id @default(cuid())
-  teamId String
-  userId String
-  role   UserRole @default(EMPLOYEE)
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  teamId String @db.ObjectId
+  userId String @db.ObjectId
+  role   String @default("EMPLOYEE")
 
   team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -123,16 +60,16 @@ model TeamMember {
 }
 
 model Board {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
   department  String
-  teamId      String?
+  teamId      String?  @db.ObjectId
   isArchived  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  team    Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team    Team?    @relation(fields: [teamId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   columns Column[]
   tasks   Task[]
 
@@ -141,8 +78,8 @@ model Board {
 }
 
 model Column {
-  id        String   @id @default(cuid())
-  boardId   String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  boardId   String   @db.ObjectId
   name      String
   slug      String?
   color     String   @default("#6366f1")
@@ -158,16 +95,16 @@ model Column {
 }
 
 model Task {
-  id          String    @id @default(cuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
-  priority    Priority  @default(MEDIUM)
+  priority    String    @default("MEDIUM")
   status      String
-  boardId     String
-  columnId    String
-  assigneeId  String?
-  teamId      String?
-  creatorId   String
+  boardId     String    @db.ObjectId
+  columnId    String    @db.ObjectId
+  assigneeId  String?   @db.ObjectId
+  teamId      String?   @db.ObjectId
+  creatorId   String    @db.ObjectId
   dueDate     DateTime?
   amount      Int?
   customer    String?
@@ -179,9 +116,9 @@ model Task {
 
   board        Board         @relation(fields: [boardId], references: [id], onDelete: Cascade)
   column       Column        @relation(fields: [columnId], references: [id])
-  assignee     User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  assignee     User?         @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   creator      User          @relation("TaskCreator", fields: [creatorId], references: [id])
-  team         Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  team         Team?         @relation(fields: [teamId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   comments     Comment[]
   attachments  Attachment[]
   activityLogs ActivityLog[]
@@ -195,7 +132,7 @@ model Task {
 }
 
 model Tag {
-  id    String @id @default(cuid())
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
   name  String @unique
   color String @default("#94a3b8")
 
@@ -203,21 +140,22 @@ model Tag {
 }
 
 model TaskTag {
-  taskId String
-  tagId  String
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  taskId String @db.ObjectId
+  tagId  String @db.ObjectId
 
   task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
-  @@id([taskId, tagId])
+  @@unique([taskId, tagId])
 }
 
 model Comment {
-  id        String   @id @default(cuid())
-  taskId    String
-  authorId  String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  taskId    String   @db.ObjectId
+  authorId  String   @db.ObjectId
   content   String
-  mentions  Json      @default("[]")
+  mentions  Json     @default("[]")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -228,9 +166,9 @@ model Comment {
 }
 
 model Attachment {
-  id          String   @id @default(cuid())
-  taskId      String
-  uploaderId  String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  taskId      String   @db.ObjectId
+  uploaderId  String   @db.ObjectId
   fileName    String
   fileSize    Int
   mimeType    String
@@ -246,8 +184,8 @@ model Attachment {
 }
 
 model AttachmentVersion {
-  id           String   @id @default(cuid())
-  attachmentId String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  attachmentId String   @db.ObjectId
   version      Int
   storagePath  String
   fileSize     Int
@@ -257,13 +195,13 @@ model AttachmentVersion {
 }
 
 model ActivityLog {
-  id        String         @id @default(cuid())
-  taskId    String?
-  userId    String
-  action    ActivityAction
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  taskId    String?  @db.ObjectId
+  userId    String   @db.ObjectId
+  action    String
   message   String
   metadata  Json?
-  createdAt DateTime       @default(now())
+  createdAt DateTime @default(now())
 
   task Task? @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user User  @relation(fields: [userId], references: [id])
@@ -273,14 +211,14 @@ model ActivityLog {
 }
 
 model Notification {
-  id        String           @id @default(cuid())
-  userId    String
-  type      NotificationType
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  type      String
   title     String
   message   String
   link      String?
-  isRead    Boolean          @default(false)
-  createdAt DateTime         @default(now())
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -288,8 +226,8 @@ model Notification {
 }
 
 model AuditLog {
-  id         String   @id @default(cuid())
-  userId     String?
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?  @db.ObjectId
   action     String
   entityType String
   entityId   String?
@@ -297,7 +235,7 @@ model AuditLog {
   ipAddress  String?
   createdAt  DateTime @default(now())
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([entityType, entityId])
   @@index([action])
@@ -305,8 +243,8 @@ model AuditLog {
 }
 
 model SavedFilter {
-  id        String   @id @default(cuid())
-  userId    String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
   name      String
   filters   Json
   isDefault Boolean  @default(false)
@@ -319,25 +257,25 @@ model SavedFilter {
 }
 
 model AutomationRule {
-  id          String            @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  boardId     String?
-  trigger     AutomationTrigger
-  action      AutomationAction
+  boardId     String?  @db.ObjectId
+  trigger     String
+  action      String
   conditions  Json
   config      Json
-  isActive    Boolean           @default(true)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([boardId])
   @@index([isActive])
 }
 
 model CompanySettings {
-  id        String   @id @default("default")
-  name      String   @default("WorkflowHub")
+  id        String   @id @map("_id") @default("default")
+  name      String   @default("Avishkar AI")
   logo      String?
   timezone  String   @default("UTC")
   createdAt DateTime @default(now())

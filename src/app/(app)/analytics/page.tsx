@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api-client";
 import { PRIORITY_CONFIG } from "@/lib/utils";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 

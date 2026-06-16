@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { signToken, verifyPassword, sanitizeUser } from "@/lib/auth";
+import { UserRole } from "@/lib/db-enums";
 import { loginSchema } from "@/lib/validations";
 import { jsonOk, jsonError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit";
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     const valid = await verifyPassword(password, user.passwordHash);
     if (!valid) return jsonError("Incorrect email or password", 401);
 
-    const token = signToken({ userId: user.id, email: user.email, role: user.role });
+    const token = signToken({ userId: user.id, email: user.email, role: user.role as UserRole });
 
     await logActivity({ userId: user.id, action: "LOGIN", message: `${user.name} logged in` });
     await createAuditLog({

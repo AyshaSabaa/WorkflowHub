@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useAuth } from "@/contexts/auth-context";
 import { api } from "@/lib/api-client";
 import { ROLE_LABELS } from "@/lib/utils";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/lib/db-enums";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
 

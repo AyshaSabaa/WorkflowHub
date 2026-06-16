@@ -17,7 +17,7 @@ import { api } from "@/lib/api-client";
 import { formatCurrency, sumAmounts } from "@/lib/utils";
 import { getProspectColumnId } from "@/lib/pipeline-stages";
 import { Plus, Columns3 } from "lucide-react";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 

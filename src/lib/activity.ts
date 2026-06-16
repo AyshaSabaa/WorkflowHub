@@ -1,4 +1,4 @@
-import { ActivityAction } from "@prisma/client";
+import { ActivityAction } from "@/lib/db-enums";
 import { prisma } from "./prisma";
 
 export async function logActivity(params: {

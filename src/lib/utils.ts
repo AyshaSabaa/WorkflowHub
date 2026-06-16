@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, formatDistanceToNow, isPast, isToday, isTomorrow } from "date-fns";
-import { UserRole } from "@prisma/client";
+import { UserRole } from "@/lib/db-enums";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

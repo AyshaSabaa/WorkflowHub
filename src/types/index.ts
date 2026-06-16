@@ -1,4 +1,4 @@
-import { Priority, UserRole } from "@prisma/client";
+import { UserRole, Priority } from "@/lib/db-enums";
 
 export interface AuthUser {
   id: string;

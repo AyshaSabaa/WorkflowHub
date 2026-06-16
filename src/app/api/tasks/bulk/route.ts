@@ -6,7 +6,7 @@ import { jsonOk, jsonError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit";
 import { columnStatus } from "@/lib/pipeline-stages";
 import { z } from "zod";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 
 const bulkSchema = z.object({
   ids: z.array(z.string()).min(1),
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         break;
       case "changePriority":
         if (!priority) return jsonError("priority required", 400);
-        count = (await prisma.task.updateMany({ where: { id: { in: ids } }, data: { priority: priority as Priority } })).count;
+        count = (await prisma.task.updateMany({ where: { id: { in: ids } }, data: { priority } })).count;
         break;
       case "changeColumn":
         if (!columnId) return jsonError("columnId required", 400);

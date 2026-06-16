@@ -5,7 +5,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Clock, IndianRupee, User } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { formatCurrency, formatDate, cn } from "@/lib/utils";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 
 export interface KanbanTaskData {
   id: string;

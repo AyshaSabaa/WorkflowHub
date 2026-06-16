@@ -17,6 +17,15 @@ export function handleApiError(error: unknown) {
   if (error instanceof ZodError) {
     return jsonError(error.issues.map((e) => e.message).join(", "), 422);
   }
+  if (error && typeof error === "object" && "name" in error && error.name === "PrismaClientInitializationError") {
+    console.error("Database connection failed:", error);
+    return jsonError(
+      process.env.NODE_ENV === "production"
+        ? "Database unavailable. Check DATABASE_URL on the server."
+        : `Database error: ${error instanceof Error ? error.message : "PrismaClientInitializationError"}`,
+      503
+    );
+  }
   console.error(error);
   return jsonError("Internal server error", 500);
 }

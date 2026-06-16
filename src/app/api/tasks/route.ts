@@ -7,7 +7,7 @@ import { jsonOk, jsonError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit";
 import { logActivity, createNotification } from "@/lib/activity";
 import { columnStatus } from "@/lib/pipeline-stages";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 
 export async function GET(req: NextRequest) {
   try {

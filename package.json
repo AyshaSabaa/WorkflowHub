@@ -10,9 +10,11 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
+    "db:migrate": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:prod": "node scripts/seed-production.mjs",
+    "vercel-build": "node scripts/vercel-build.mjs",
     "db:studio": "prisma studio",
     "postinstall": "prisma generate"
   },

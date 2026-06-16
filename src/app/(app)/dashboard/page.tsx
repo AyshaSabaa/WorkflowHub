@@ -11,7 +11,7 @@ import { api } from "@/lib/api-client";
 import { PRIORITY_CONFIG, formatRelative } from "@/lib/utils";
 import { CheckCircle2, Clock, AlertTriangle, ListTodo, Download, Plus, Kanban } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { Priority } from "@prisma/client";
+import { Priority } from "@/lib/db-enums";
 import { toast } from "sonner";
 
 const CHART_COLORS = ["#ff7a59", "#00bda5", "#6366f1", "#f59e0b", "#8b5cf6", "#22c55e"];
