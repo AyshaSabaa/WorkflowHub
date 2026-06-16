@@ -5,6 +5,7 @@ import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Avatar } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -71,7 +72,7 @@ export default function SettingsPage() {
         )}
 
         {tab === "users" && isAdmin && (
-          <Card>
+          <Card className="crm-card--flat">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>User Management</CardTitle>
               <Button size="sm" onClick={() => setShowUser(true)}><Plus className="h-4 w-4" />Add User</Button>
@@ -126,7 +127,7 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div><Label>Name</Label><Input className="mt-1" value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} /></div>
             <div><Label>Email</Label><Input className="mt-1" type="email" value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} /></div>
-            <div><Label>Password</Label><Input className="mt-1" type="password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} /></div>
+            <div><Label>Password</Label><PasswordInput className="mt-1" autoComplete="new-password" value={userForm.password} onChange={(e) => setUserForm({ ...userForm, password: e.target.value })} /></div>
             <div><Label>Role</Label>
               <select className="mt-1 w-full h-9 rounded-md border px-2 text-sm dark:bg-slate-900" value={userForm.role} onChange={(e) => setUserForm({ ...userForm, role: e.target.value as UserRole })}>
                 <option value="ADMIN">Admin</option><option value="MANAGER">Manager</option><option value="EMPLOYEE">Employee</option>

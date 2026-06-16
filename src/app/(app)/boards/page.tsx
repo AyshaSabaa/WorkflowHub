@@ -90,7 +90,7 @@ export default function BoardsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {boards.map((board) => (
-              <Card key={board.id} className="group hover:border-[#ff7a59]/40 transition-all">
+              <Card key={board.id} className="group">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between mb-3">
                     <Link href={`/boards/${board.id}`} className="p-2 rounded-lg bg-gradient-to-br from-[#ff7a59]/10 to-[#00bda5]/10"><Kanban className="h-5 w-5 text-[#ff7a59]" /></Link>

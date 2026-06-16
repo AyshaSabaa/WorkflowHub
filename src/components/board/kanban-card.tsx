@@ -59,7 +59,7 @@ export function KanbanCard({ task, onClick }: { task: KanbanTaskData; onClick: (
         </span>
       </div>
 
-      <div className="space-y-1.5 pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06]">
+      <div className="space-y-1.5 pt-2.5 shadow-[inset_0_1px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         {task.assignee ? (
           <div className="flex items-center gap-1.5 min-w-0">
             <User className="h-3 w-3 text-slate-400 shrink-0" />

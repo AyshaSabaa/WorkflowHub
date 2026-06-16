@@ -66,7 +66,7 @@ export function KanbanColumn({
           </button>
           <div className="h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-white dark:ring-slate-800" style={{ backgroundColor: column.color }} />
           <h3 className="text-sm font-semibold truncate text-slate-800 dark:text-slate-100">{column.name}</h3>
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-white/10 rounded-full px-2 py-0.5 shrink-0 border border-black/[0.04] dark:border-white/[0.06]">
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-white/10 rounded-full px-2 py-0.5 shrink-0 shadow-sm">
             {column.tasks.length}
           </span>
         </div>
@@ -102,7 +102,7 @@ export function KanbanColumn({
         </SortableContext>
       </div>
 
-      <div className="border-t border-black/[0.05] dark:border-white/[0.06] bg-white/60 dark:bg-[#111827]/80 backdrop-blur-sm px-3 py-2.5 space-y-1">
+      <div className="bg-white/60 dark:bg-[#111827]/80 backdrop-blur-sm px-3 py-2.5 space-y-1 shadow-[inset_0_1px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-[#33475b] dark:text-white">{formatCurrency(stageTotal)}</span>
           <span className="text-slate-400">Total amount</span>

@@ -146,7 +146,7 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        <Card>
+        <Card className="crm-card--flat">
           <CardHeader><CardTitle>Recently Updated Tasks</CardTitle></CardHeader>
           <CardContent className="divide-y">
             {data?.recentTasks.map((t) => (

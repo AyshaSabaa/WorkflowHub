@@ -109,7 +109,7 @@ export default function BoardDetailPage() {
               </span>
             )}
             {canManageColumns && (
-              <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#111827]" onClick={() => setShowNewColumn(true)}>
+              <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md bg-white dark:bg-[#111827]" onClick={() => setShowNewColumn(true)}>
                 <Columns3 className="h-4 w-4" />Add Stage
               </Button>
             )}
