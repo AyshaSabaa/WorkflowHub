@@ -35,7 +35,7 @@ export function Header({ title, subtitle, action }: { title: string; subtitle?: 
   };
 
   return (
-    <header className="crm-header flex items-center justify-between px-4 sm:px-6 py-4 shrink-0 z-10">
+    <header className="crm-header flex shrink-0 items-center justify-between px-4 sm:px-6 py-4 z-10">
       <div className="min-w-0">
         <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white truncate">{title}</h1>
         {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">{subtitle}</p>}

@@ -166,9 +166,10 @@ export function KanbanBoard({
   const columnSortIds = columns.map((c) => `col-${c.id}`);
 
   return (
+    <div className="h-full min-h-0">
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <SortableContext items={columnSortIds} strategy={horizontalListSortingStrategy}>
-        <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 px-1 h-full snap-x snap-mandatory scroll-smooth">
+        <div className="flex h-full min-h-0 gap-4 sm:gap-5 overflow-x-auto overflow-y-hidden pb-4 px-1 snap-x snap-mandatory scroll-smooth items-stretch">
           {columns.map((column) => (
             <KanbanColumn
               key={column.id}
@@ -202,5 +203,6 @@ export function KanbanBoard({
         )}
       </DragOverlay>
     </DndContext>
+    </div>
   );
 }

@@ -177,6 +177,7 @@ export default function BoardDetailPage() {
 
   return (
     <>
+      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       <Header
         title={board?.name || "Board"}
         subtitle={board?.department}
@@ -198,7 +199,7 @@ export default function BoardDetailPage() {
           </div>
         }
       />
-      <div className="flex-1 overflow-hidden p-4 sm:p-6 bg-slate-50/50 dark:bg-transparent">
+      <div className="flex-1 min-h-0 p-4 sm:p-6 bg-slate-50/50 dark:bg-transparent">
         {board && (
           <KanbanBoard
             columns={board.columns}
@@ -217,6 +218,7 @@ export default function BoardDetailPage() {
             onColumnsChange={loadBoard}
           />
         )}
+      </div>
       </div>
 
       <TaskDetailDialog taskId={selectedTask} open={!!selectedTask} onClose={() => setSelectedTask(null)} onUpdate={loadBoard} isDeal={isPipeline} />

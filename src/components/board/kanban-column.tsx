@@ -67,11 +67,11 @@ export function KanbanColumn({
       ref={setSortRef}
       style={style}
       className={cn(
-        "crm-column flex w-[min(288px,85vw)] sm:w-72 shrink-0 flex-col overflow-hidden snap-center",
+        "crm-column flex h-full max-h-full min-h-0 w-[min(288px,85vw)] sm:w-72 shrink-0 flex-col snap-center",
         isDragging && "opacity-70 scale-[0.99]"
       )}
     >
-      <div className="flex items-center justify-between px-3 pt-3 pb-2 gap-1">
+      <div className="flex shrink-0 items-center justify-between px-3 pt-3 pb-2 gap-1">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <button {...attributes} {...listeners} className="p-0.5 cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0">
             <GripVertical className="h-4 w-4" />
@@ -103,7 +103,7 @@ export function KanbanColumn({
       <div
         ref={setDropRef}
         className={cn(
-          "flex-1 space-y-2.5 px-2.5 pb-2.5 min-h-[220px] transition-colors duration-200",
+          "flex-1 min-h-0 overflow-y-auto overscroll-y-contain space-y-2.5 px-2.5 pb-2.5 min-h-[120px] transition-colors duration-200",
           isOver && "bg-[#0091ae]/[0.04] ring-2 ring-inset ring-[#0091ae]/20 rounded-xl mx-1"
         )}
       >
@@ -124,7 +124,7 @@ export function KanbanColumn({
         </SortableContext>
       </div>
 
-      <div className="bg-white/60 dark:bg-[#111827]/80 backdrop-blur-sm px-3 py-2.5 space-y-1 shadow-[inset_0_1px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="shrink-0 bg-white/60 dark:bg-[#111827]/80 backdrop-blur-sm px-3 py-2.5 space-y-1 shadow-[inset_0_1px_0_rgba(0,0,0,0.04)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-[#33475b] dark:text-white">{formatCurrency(stageTotal)}</span>
           <span className="text-slate-400">Total amount</span>
