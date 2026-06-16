@@ -74,7 +74,6 @@ export function TaskDetailDialog({
       await api.updateTask(task.id, { [field]: value });
       setTask({ ...task, [field]: value });
       onUpdate?.();
-      toast.success(`${label} updated`);
     } catch { toast.error("Update failed"); }
   };
 
