@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/auth";
 import { taskSchema } from "@/lib/validations";
-import { PERMISSIONS } from "@/lib/permissions";
+import { PERMISSIONS, canDeleteTask } from "@/lib/permissions";
 import { jsonOk, jsonError, handleApiError } from "@/lib/api-response";
 import { createAuditLog } from "@/lib/audit";
 import { logActivity, createNotification } from "@/lib/activity";
@@ -88,11 +88,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 export async function DELETE(req: NextRequest, { params }: Params) {
   try {
     const user = await requireAuth(req);
-    if (!PERMISSIONS.canDeleteTasks(user.role)) return jsonError("Forbidden", 403);
-
     const { taskId } = await params;
     const task = await prisma.task.findUnique({ where: { id: taskId } });
     if (!task) return jsonError("Task not found", 404);
+
+    if (!canDeleteTask(user.role, user.id, task)) {
+      return jsonError("Forbidden", 403);
+    }
+
+    await prisma.notification.deleteMany({
+      where: { link: { contains: taskId } },
+    });
 
     await prisma.task.delete({ where: { id: taskId } });
 

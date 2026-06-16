@@ -25,3 +25,15 @@ export const PERMISSIONS = {
   canExport: (r: UserRole | string) => hasMinRole(r, "EMPLOYEE"),
   canBulkActions: (r: UserRole | string) => hasMinRole(r, "MANAGER"),
 } as const;
+
+/** Admin: any deal. Manager: assigned deals only. Employee: cannot delete. */
+export function canDeleteTask(
+  role: UserRole | string,
+  userId: string,
+  task: { assigneeId?: string | null }
+): boolean {
+  const r = role as UserRole;
+  if (r === "ADMIN") return true;
+  if (hasMinRole(r, "MANAGER")) return task.assigneeId === userId;
+  return false;
+}

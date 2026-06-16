@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { KanbanBoard } from "@/components/board/kanban-board";
+import { KanbanTaskData } from "@/components/board/kanban-card";
 import { TaskDetailDialog } from "@/components/tasks/task-detail-dialog";
 import { ColumnData } from "@/components/board/kanban-column";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -18,6 +19,7 @@ import { getProspectColumnId } from "@/lib/pipeline-stages";
 import { Plus, Columns3 } from "lucide-react";
 import { Priority } from "@/lib/db-enums";
 import { toast } from "sonner";
+import { canDeleteTask } from "@/lib/permissions";
 import { useAuth } from "@/contexts/auth-context";
 
 export default function BoardDetailPage() {
@@ -41,6 +43,11 @@ export default function BoardDetailPage() {
   });
   const [columnForm, setColumnForm] = useState({ name: "", color: "#6366f1" });
   const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
+  const [taskToDelete, setTaskToDelete] = useState<KanbanTaskData | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [taskToMove, setTaskToMove] = useState<{ task: KanbanTaskData; fromColumnId: string } | null>(null);
+  const [moveTargetColumn, setMoveTargetColumn] = useState("");
+  const [moving, setMoving] = useState(false);
 
   const isPipeline = board?.name.toLowerCase().includes("pipeline") || board?.department === "Sales";
   const dealLabel = isPipeline ? "Deal" : "Task";
@@ -94,6 +101,78 @@ export default function BoardDetailPage() {
     } catch (e) { toast.error(e instanceof Error ? e.message : "Failed"); }
   };
 
+  const removeTaskFromBoard = (taskId: string) => {
+    setBoard((prev) => prev ? {
+      ...prev,
+      columns: prev.columns.map((c) => ({
+        ...c,
+        tasks: c.tasks.filter((t) => t.id !== taskId),
+      })),
+    } : null);
+    if (selectedTask === taskId) setSelectedTask(null);
+  };
+
+  const checkCanDelete = (task: KanbanTaskData) => {
+    if (!user) return false;
+    const assigneeId = task.assigneeId ?? task.assignee?.id ?? null;
+    return canDeleteTask(user.role, user.id, { assigneeId });
+  };
+
+  const confirmDeleteTask = async () => {
+    if (!taskToDelete) return;
+    setDeleting(true);
+    const taskId = taskToDelete.id;
+    removeTaskFromBoard(taskId);
+    try {
+      await api.deleteTask(taskId);
+      toast.success("Deal deleted successfully.");
+      setTaskToDelete(null);
+    } catch {
+      loadBoard();
+      toast.error("Unable to delete deal. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleDuplicateTask = async (task: KanbanTaskData, columnId: string) => {
+    try {
+      await api.createTask({
+        title: `${task.title} (Copy)`,
+        description: task.description || undefined,
+        customer: task.customer ?? null,
+        amount: task.amount ?? null,
+        priority: task.priority,
+        boardId,
+        columnId,
+        assigneeId: task.assigneeId ?? task.assignee?.id ?? null,
+        dueDate: task.dueDate ?? null,
+      });
+      toast.success(`${dealLabel} duplicated`);
+      loadBoard();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to duplicate");
+    }
+  };
+
+  const handleMoveTask = async () => {
+    if (!taskToMove || !moveTargetColumn) return;
+    setMoving(true);
+    try {
+      const targetCol = board?.columns.find((c) => c.id === moveTargetColumn);
+      const position = targetCol?.tasks.length ?? 0;
+      await api.moveTask(taskToMove.task.id, moveTargetColumn, position);
+      toast.success(`${dealLabel} moved`);
+      setTaskToMove(null);
+      setMoveTargetColumn("");
+      loadBoard();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to move");
+    } finally {
+      setMoving(false);
+    }
+  };
+
   if (loading) return <><Header title="Loading..." /><div className="p-6"><Skeleton className="h-96 w-full" /></div></>;
 
   return (
@@ -124,7 +203,16 @@ export default function BoardDetailPage() {
           <KanbanBoard
             columns={board.columns}
             boardId={boardId}
+            dealLabel={dealLabel}
+            canDeleteTask={checkCanDelete}
             onTaskClick={setSelectedTask}
+            onTaskEdit={setSelectedTask}
+            onTaskMove={(task, columnId) => {
+              setTaskToMove({ task, fromColumnId: columnId });
+              setMoveTargetColumn(columnId);
+            }}
+            onTaskDuplicate={handleDuplicateTask}
+            onTaskDelete={setTaskToDelete}
             onAddTask={(colId) => { setNewTaskColumn(colId); setShowNewTask(true); }}
             onColumnsChange={loadBoard}
           />
@@ -181,6 +269,59 @@ export default function BoardDetailPage() {
               <Button variant="outline" onClick={() => setShowNewColumn(false)}>Cancel</Button>
               <Button onClick={handleCreateColumn}>Add Stage</Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!taskToDelete} onOpenChange={(open) => !open && setTaskToDelete(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Delete {dealLabel}</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to delete this deal? This action cannot be undone.
+          </p>
+          {taskToDelete && (
+            <p className="text-sm font-medium text-slate-900 dark:text-white mt-1">{taskToDelete.title}</p>
+          )}
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setTaskToDelete(null)} disabled={deleting}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteTask} disabled={deleting}>
+              {deleting ? "Deleting..." : "Delete"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!taskToMove} onOpenChange={(open) => { if (!open) { setTaskToMove(null); setMoveTargetColumn(""); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Move {dealLabel}</DialogTitle>
+          </DialogHeader>
+          {taskToMove && (
+            <p className="text-sm text-muted-foreground mb-2">{taskToMove.task.title}</p>
+          )}
+          <div>
+            <Label>Destination stage</Label>
+            <select
+              className="mt-1 w-full h-9 rounded-md border px-2 text-sm dark:bg-slate-900 dark:border-slate-700"
+              value={moveTargetColumn}
+              onChange={(e) => setMoveTargetColumn(e.target.value)}
+            >
+              {board?.columns.map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => { setTaskToMove(null); setMoveTargetColumn(""); }} disabled={moving}>
+              Cancel
+            </Button>
+            <Button onClick={handleMoveTask} disabled={moving || !moveTargetColumn}>
+              {moving ? "Moving..." : "Move"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

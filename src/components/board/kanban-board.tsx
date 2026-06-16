@@ -22,19 +22,30 @@ import { toast } from "sonner";
 export function KanbanBoard({
   columns: initialColumns,
   boardId,
+  dealLabel = "Deal",
+  canDeleteTask,
   onTaskClick,
+  onTaskEdit,
+  onTaskMove,
+  onTaskDuplicate,
+  onTaskDelete,
   onAddTask,
   onColumnsChange,
 }: {
   columns: ColumnData[];
   boardId: string;
+  dealLabel?: string;
+  canDeleteTask: (task: KanbanTaskData) => boolean;
   onTaskClick: (taskId: string) => void;
+  onTaskEdit: (taskId: string) => void;
+  onTaskMove: (task: KanbanTaskData, columnId: string) => void;
+  onTaskDuplicate: (task: KanbanTaskData, columnId: string) => void;
+  onTaskDelete: (task: KanbanTaskData) => void;
   onAddTask: (columnId: string) => void;
   onColumnsChange?: () => void;
 }) {
   const [columns, setColumns] = useState(initialColumns);
   const [activeTask, setActiveTask] = useState<KanbanTaskData | null>(null);
-  const [activeColumnId, setActiveColumnId] = useState<string | null>(null);
 
   useEffect(() => { setColumns(initialColumns); }, [initialColumns]);
 
@@ -47,10 +58,7 @@ export function KanbanBoard({
 
   const handleDragStart = (event: DragStartEvent) => {
     const id = String(event.active.id);
-    if (id.startsWith("col-")) {
-      setActiveColumnId(id.replace("col-", ""));
-      return;
-    }
+    if (id.startsWith("col-")) return;
     const col = findColumn(id);
     const task = col?.tasks.find((t) => t.id === id);
     if (task) setActiveTask(task);
@@ -84,7 +92,6 @@ export function KanbanBoard({
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveTask(null);
-    setActiveColumnId(null);
     if (!over) return;
 
     const activeId = String(active.id);
@@ -143,13 +150,17 @@ export function KanbanBoard({
     } catch { toast.error("Failed to rename column"); }
   };
 
-  const handleDelete = async (columnId: string) => {
+  const handleDeleteColumn = async (columnId: string) => {
     if (!confirm("Delete this column?")) return;
     try {
       await api.deleteColumn(columnId);
       setColumns((prev) => prev.filter((c) => c.id !== columnId));
       toast.success("Column deleted");
     } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to delete column"); }
+  };
+
+  const handleDeleteTask = (task: KanbanTaskData) => {
+    onTaskDelete(task);
   };
 
   const columnSortIds = columns.map((c) => `col-${c.id}`);
@@ -162,16 +173,33 @@ export function KanbanBoard({
             <KanbanColumn
               key={column.id}
               column={column}
+              dealLabel={dealLabel}
+              canDeleteTask={canDeleteTask}
               onAddTask={onAddTask}
               onTaskClick={onTaskClick}
+              onTaskEdit={onTaskEdit}
+              onTaskMove={onTaskMove}
+              onTaskDuplicate={onTaskDuplicate}
+              onTaskDelete={handleDeleteTask}
               onRename={handleRename}
-              onDelete={handleDelete}
+              onDelete={handleDeleteColumn}
             />
           ))}
         </div>
       </SortableContext>
       <DragOverlay>
-        {activeTask && <KanbanCard task={activeTask} onClick={() => {}} />}
+        {activeTask && (
+          <KanbanCard
+            task={activeTask}
+            dealLabel={dealLabel}
+            canDelete={false}
+            onClick={() => {}}
+            onEdit={() => {}}
+            onMove={() => {}}
+            onDuplicate={() => {}}
+            onDelete={() => {}}
+          />
+        )}
       </DragOverlay>
     </DndContext>
   );

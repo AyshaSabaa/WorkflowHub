@@ -25,14 +25,26 @@ export interface ColumnData {
 
 export function KanbanColumn({
   column,
+  dealLabel = "Deal",
+  canDeleteTask,
   onAddTask,
   onTaskClick,
+  onTaskEdit,
+  onTaskMove,
+  onTaskDuplicate,
+  onTaskDelete,
   onRename,
   onDelete,
 }: {
   column: ColumnData;
+  dealLabel?: string;
+  canDeleteTask: (task: KanbanTaskData) => boolean;
   onAddTask: (columnId: string) => void;
   onTaskClick: (taskId: string) => void;
+  onTaskEdit: (taskId: string) => void;
+  onTaskMove: (task: KanbanTaskData, columnId: string) => void;
+  onTaskDuplicate: (task: KanbanTaskData, columnId: string) => void;
+  onTaskDelete: (task: KanbanTaskData) => void;
   onRename: (columnId: string, name: string) => void;
   onDelete: (columnId: string) => void;
 }) {
@@ -97,7 +109,17 @@ export function KanbanColumn({
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
           {column.tasks.map((task) => (
-            <KanbanCard key={task.id} task={task} onClick={() => onTaskClick(task.id)} />
+            <KanbanCard
+              key={task.id}
+              task={task}
+              dealLabel={dealLabel}
+              canDelete={canDeleteTask(task)}
+              onClick={() => onTaskClick(task.id)}
+              onEdit={() => onTaskEdit(task.id)}
+              onMove={() => onTaskMove(task, column.id)}
+              onDuplicate={() => onTaskDuplicate(task, column.id)}
+              onDelete={() => onTaskDelete(task)}
+            />
           ))}
         </SortableContext>
       </div>
