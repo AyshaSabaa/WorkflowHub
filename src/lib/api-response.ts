@@ -18,7 +18,16 @@ export function handleApiError(error: unknown) {
     return jsonError(error.issues.map((e) => e.message).join(", "), 422);
   }
   if (error && typeof error === "object" && "name" in error && error.name === "PrismaClientInitializationError") {
-    console.error("Database connection failed:", error);
+    const prismaError = error as Error & { clientVersion?: string; errorCode?: string };
+    console.error("Database connection failed:", {
+      name: prismaError.name,
+      message: prismaError.message,
+      stack: prismaError.stack,
+      clientVersion: prismaError.clientVersion,
+      errorCode: prismaError.errorCode,
+      databaseUrlSet: !!process.env.DATABASE_URL,
+      databaseUrlProtocol: process.env.DATABASE_URL?.split(":")[0],
+    });
     return jsonError(
       process.env.NODE_ENV === "production"
         ? "Database unavailable. Check DATABASE_URL on the server."

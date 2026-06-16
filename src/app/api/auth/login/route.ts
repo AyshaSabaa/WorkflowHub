@@ -8,6 +8,12 @@ import { createAuditLog } from "@/lib/audit";
 import { logActivity } from "@/lib/activity";
 
 export async function POST(req: NextRequest) {
+  console.log("DATABASE_URL exists:", !!process.env.DATABASE_URL);
+  console.log("JWT_SECRET exists:", !!process.env.JWT_SECRET);
+  if (process.env.DATABASE_URL) {
+    console.log("DATABASE_URL protocol:", process.env.DATABASE_URL.split(":")[0]);
+  }
+
   try {
     const { email, password } = loginSchema.parse(await req.json());
 
@@ -38,6 +44,12 @@ export async function POST(req: NextRequest) {
     });
     return response;
   } catch (error) {
+    console.error("LOGIN ERROR", error);
+    if (error instanceof Error) {
+      console.error("LOGIN ERROR stack:", error.stack);
+      console.error("LOGIN ERROR name:", error.name);
+      console.error("LOGIN ERROR message:", error.message);
+    }
     return handleApiError(error);
   }
 }
