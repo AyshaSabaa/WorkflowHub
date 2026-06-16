@@ -13,8 +13,8 @@ import { toast } from "sonner";
 export default function LoginPage() {
   const { login, user, loading } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState("admin@workflowhub.com");
-  const [password, setPassword] = useState("admin123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -70,7 +70,6 @@ export default function LoginPage() {
               <div><Label htmlFor="password">Password</Label><Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" required /></div>
               <Button type="submit" className="w-full" disabled={submitting}>{submitting ? "Signing in..." : "Sign in"}</Button>
             </form>
-            <p className="mt-4 text-center text-xs text-muted-foreground">Demo: admin@workflowhub.com / admin123 · manager@workflowhub.com / demo123</p>
           </CardContent>
         </Card>
       </div>

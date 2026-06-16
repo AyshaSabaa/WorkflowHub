@@ -19,5 +19,6 @@ console.log("Seeding demo users and CRM data...");
 execSync("npx tsx prisma/seed.ts", { stdio: "inherit", env: process.env });
 
 console.log("\n✓ MongoDB ready.");
-console.log("  admin@workflowhub.com / admin123");
-console.log("  manager@workflowhub.com / demo123");
+console.log("  aysha@avishkarai.com");
+console.log("  shivang@avishkarai.com");
+console.log("  arpit@avishkarai.com");

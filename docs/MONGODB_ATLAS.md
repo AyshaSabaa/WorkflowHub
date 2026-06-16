@@ -68,8 +68,9 @@ npm run dev
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@workflowhub.com | admin123 | Admin |
-| manager@workflowhub.com | demo123 | Manager |
+| aysha@avishkarai.com | hello123 | Admin |
+| shivang@avishkarai.com | hello123 | Manager |
+| arpit@avishkarai.com | hello123 | Manager |
 
 ## 6. Vercel deployment
 
@@ -125,7 +126,7 @@ MongoDB does **not** use `prisma migrate`. The `prisma/migrations` folder was re
 
 ## 8. Verify after deploy
 
-1. **Login** — `admin@workflowhub.com` / `admin123`
+1. **Login** — `aysha@avishkarai.com` / `hello123`
 2. **User lookup** — Settings → Users list loads
 3. **Create deal** — Sales Pipeline → add card in a stage
 4. **Pipeline** — Kanban drag-and-drop between stages

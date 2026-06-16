@@ -138,7 +138,7 @@ export default function BoardDetailPage() {
         <DialogContent>
           <DialogHeader><DialogTitle>Create {dealLabel}</DialogTitle></DialogHeader>
           <div className="space-y-4">
-            <div><Label>Customer Name</Label><Input className="mt-1" value={taskForm.customer} onChange={(e) => setTaskForm({ ...taskForm, customer: e.target.value })} placeholder="ABC Pvt Ltd" /></div>
+            <div><Label>Customer Name</Label><Input className="mt-1" value={taskForm.customer} onChange={(e) => setTaskForm({ ...taskForm, customer: e.target.value })} placeholder="Customer name" /></div>
             <div><Label>{dealLabel} Title</Label><Input className="mt-1" value={taskForm.title} onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })} placeholder="Website Development" /></div>
             <div><Label>Description</Label><Textarea className="mt-1" value={taskForm.description} onChange={(e) => setTaskForm({ ...taskForm, description: e.target.value })} rows={2} /></div>
             <div className="grid grid-cols-2 gap-4">

@@ -24,9 +24,9 @@ Open http://localhost:3000
 
 | Email | Password | Role |
 |-------|----------|------|
-| admin@workflowhub.com | admin123 | Admin |
-| manager@workflowhub.com | demo123 | Manager |
-| employee@workflowhub.com | demo123 | Employee |
+| aysha@avishkarai.com | hello123 | Admin |
+| shivang@avishkarai.com | hello123 | Manager |
+| arpit@avishkarai.com | hello123 | Manager |
 
 ## Stack
 
