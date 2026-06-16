@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-slate-100/80 dark:bg-[#020617]">
       <Sidebar />
       <main className="flex-1 flex flex-col overflow-hidden">{children}</main>
     </div>

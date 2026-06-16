@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Bell, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { api } from "@/lib/api-client";
-import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatRelative } from "@/lib/utils";
@@ -36,20 +35,17 @@ export function Header({ title, subtitle, action }: { title: string; subtitle?: 
   };
 
   return (
-    <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6 py-4 dark:border-slate-800 dark:bg-slate-950">
-      <div className="flex items-center gap-4 min-w-0">
-        <Logo variant="header" className="hidden sm:flex" />
-        <div className="min-w-0">
-          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white truncate">{title}</h1>
-          {subtitle && <p className="text-sm text-slate-500 mt-0.5 truncate">{subtitle}</p>}
-        </div>
+    <header className="crm-header flex items-center justify-between px-4 sm:px-6 py-4 shrink-0 z-10">
+      <div className="min-w-0">
+        <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white truncate">{title}</h1>
+        {subtitle && <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 truncate">{subtitle}</p>}
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {action}
         <div className="relative">
           <button
             onClick={() => setShowNotifs(!showNotifs)}
-            className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="relative p-2 rounded-xl border border-transparent hover:border-black/[0.05] dark:hover:border-white/[0.08] hover:bg-slate-100/80 dark:hover:bg-white/5 transition-all duration-200 shadow-sm hover:shadow-md"
           >
             <Bell className="h-5 w-5 text-slate-600 dark:text-slate-400" />
             {unreadCount > 0 && (
@@ -59,8 +55,8 @@ export function Header({ title, subtitle, action }: { title: string; subtitle?: 
             )}
           </button>
           {showNotifs && (
-            <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900 z-50">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="absolute right-0 top-full mt-2 w-80 rounded-2xl border border-black/[0.05] dark:border-white/[0.08] bg-white dark:bg-[#111827] shadow-[0_8px_24px_rgba(0,0,0,0.12)] dark:shadow-[0_8px_24px_rgba(0,0,0,0.45)] z-50">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-black/[0.05] dark:border-white/[0.08]">
                 <span className="font-medium text-sm">Notifications</span>
                 {unreadCount > 0 && (
                   <button onClick={markAllRead} className="text-xs text-[#ff7a59] hover:underline">
@@ -76,7 +72,7 @@ export function Header({ title, subtitle, action }: { title: string; subtitle?: 
                     <div
                       key={n.id}
                       className={cn(
-                        "px-4 py-3 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer",
+                        "px-4 py-3 border-b border-black/[0.04] dark:border-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.03] cursor-pointer transition-colors",
                         !n.isRead && "bg-orange-50/50 dark:bg-orange-900/10"
                       )}
                     >
@@ -90,7 +86,11 @@ export function Header({ title, subtitle, action }: { title: string; subtitle?: 
             </div>
           )}
         </div>
-        <Button size="sm" onClick={() => router.push("/boards")}>
+        <Button
+          size="sm"
+          className="shadow-[0_2px_8px_rgba(255,122,89,0.35)] hover:shadow-[0_4px_12px_rgba(255,122,89,0.45)] transition-shadow"
+          onClick={() => router.push("/boards")}
+        >
           <Plus className="h-4 w-4" />
           New Task
         </Button>

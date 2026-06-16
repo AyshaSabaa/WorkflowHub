@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api-client";
 import { formatCurrency, sumAmounts } from "@/lib/utils";
 import { getProspectColumnId } from "@/lib/pipeline-stages";
@@ -105,22 +104,22 @@ export default function BoardDetailPage() {
         action={
           <div className="flex items-center gap-3">
             {isPipeline && (
-              <Badge variant="secondary" className="text-sm font-semibold px-3 py-1">
+              <span className="crm-pipeline-badge">
                 Pipeline Value: {formatCurrency(pipelineValue)}
-              </Badge>
+              </span>
             )}
             {canManageColumns && (
-              <Button variant="outline" size="sm" onClick={() => setShowNewColumn(true)}>
+              <Button variant="outline" size="sm" className="shadow-sm hover:shadow-md border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-[#111827]" onClick={() => setShowNewColumn(true)}>
                 <Columns3 className="h-4 w-4" />Add Stage
               </Button>
             )}
-            <Button size="sm" onClick={() => { setNewTaskColumn(board ? getProspectColumnId(board.columns) : ""); setShowNewTask(true); }}>
+            <Button size="sm" className="shadow-[0_2px_8px_rgba(255,122,89,0.3)] hover:shadow-[0_4px_12px_rgba(255,122,89,0.4)]" onClick={() => { setNewTaskColumn(board ? getProspectColumnId(board.columns) : ""); setShowNewTask(true); }}>
               <Plus className="h-4 w-4" />Add {dealLabel}
             </Button>
           </div>
         }
       />
-      <div className="flex-1 overflow-hidden p-6">
+      <div className="flex-1 overflow-hidden p-4 sm:p-6 bg-slate-50/50 dark:bg-transparent">
         {board && (
           <KanbanBoard
             columns={board.columns}

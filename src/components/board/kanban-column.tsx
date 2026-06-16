@@ -51,25 +51,32 @@ export function KanbanColumn({
   };
 
   return (
-    <div ref={setSortRef} style={style} className={cn("flex w-[min(280px,85vw)] sm:w-72 shrink-0 flex-col snap-center", isDragging && "opacity-60")}>
-      <div className="flex items-center justify-between mb-3 px-1 gap-1">
+    <div
+      ref={setSortRef}
+      style={style}
+      className={cn(
+        "crm-column flex w-[min(288px,85vw)] sm:w-72 shrink-0 flex-col overflow-hidden snap-center",
+        isDragging && "opacity-70 scale-[0.99]"
+      )}
+    >
+      <div className="flex items-center justify-between px-3 pt-3 pb-2 gap-1">
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          <button {...attributes} {...listeners} className="p-0.5 cursor-grab text-slate-400 hover:text-slate-600 shrink-0">
+          <button {...attributes} {...listeners} className="p-0.5 cursor-grab text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 shrink-0">
             <GripVertical className="h-4 w-4" />
           </button>
-          <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: column.color }} />
-          <h3 className="text-sm font-semibold truncate">{column.name}</h3>
-          <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 rounded-full px-2 py-0.5 shrink-0">
+          <div className="h-2.5 w-2.5 rounded-full shrink-0 ring-2 ring-white dark:ring-slate-800" style={{ backgroundColor: column.color }} />
+          <h3 className="text-sm font-semibold truncate text-slate-800 dark:text-slate-100">{column.name}</h3>
+          <span className="text-xs font-medium text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-white/10 rounded-full px-2 py-0.5 shrink-0 border border-black/[0.04] dark:border-white/[0.06]">
             {column.tasks.length}
           </span>
         </div>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => onAddTask(column.id)}>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg" onClick={() => onAddTask(column.id)}>
             <Plus className="h-4 w-4" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-7 w-7"><MoreHorizontal className="h-4 w-4" /></Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7 rounded-lg"><MoreHorizontal className="h-4 w-4" /></Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem onClick={handleRename}><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
@@ -84,8 +91,8 @@ export function KanbanColumn({
       <div
         ref={setDropRef}
         className={cn(
-          "flex-1 space-y-2 rounded-t-xl p-2 min-h-[200px] bg-slate-100/80 dark:bg-slate-900/50",
-          isOver && "ring-2 ring-[#0091ae]/20 bg-[#0091ae]/5"
+          "flex-1 space-y-2.5 px-2.5 pb-2.5 min-h-[220px] transition-colors duration-200",
+          isOver && "bg-[#0091ae]/[0.04] ring-2 ring-inset ring-[#0091ae]/20 rounded-xl mx-1"
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -95,7 +102,7 @@ export function KanbanColumn({
         </SortableContext>
       </div>
 
-      <div className="rounded-b-xl border border-t-0 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 space-y-1">
+      <div className="border-t border-black/[0.05] dark:border-white/[0.06] bg-white/60 dark:bg-[#111827]/80 backdrop-blur-sm px-3 py-2.5 space-y-1">
         <div className="flex items-center justify-between text-xs">
           <span className="font-semibold text-[#33475b] dark:text-white">{formatCurrency(stageTotal)}</span>
           <span className="text-slate-400">Total amount</span>

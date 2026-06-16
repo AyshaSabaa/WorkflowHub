@@ -35,12 +35,11 @@ export function KanbanCard({ task, onClick }: { task: KanbanTaskData; onClick: (
       {...listeners}
       onClick={onClick}
       className={cn(
-        "rounded-lg border border-slate-200 bg-white p-3 shadow-sm cursor-grab active:cursor-grabbing",
-        "hover:border-[#0091ae]/50 hover:shadow-md transition-all dark:border-slate-600 dark:bg-slate-800",
-        isDragging && "opacity-50 shadow-lg rotate-1"
+        "crm-card p-3.5 cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-60 rotate-1 scale-[1.02] shadow-[0_12px_32px_rgba(0,0,0,0.15)]"
       )}
     >
-      <h4 className="text-sm font-semibold text-[#33475b] dark:text-white leading-snug mb-1 line-clamp-2 hover:text-[#0091ae]">
+      <h4 className="text-sm font-semibold text-[#33475b] dark:text-white leading-snug mb-1 line-clamp-2 hover:text-[#0091ae] transition-colors">
         {task.title}
       </h4>
 
@@ -51,7 +50,7 @@ export function KanbanCard({ task, onClick }: { task: KanbanTaskData; onClick: (
       )}
 
       <div className="flex items-center gap-1.5 mb-2">
-        <IndianRupee className="h-3.5 w-3.5 text-slate-600 shrink-0" />
+        <IndianRupee className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
         <span className={cn(
           "text-sm font-bold",
           task.amount != null ? "text-[#33475b] dark:text-white" : "text-slate-400 font-normal text-xs italic"
@@ -60,7 +59,7 @@ export function KanbanCard({ task, onClick }: { task: KanbanTaskData; onClick: (
         </span>
       </div>
 
-      <div className="space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-700">
+      <div className="space-y-1.5 pt-2.5 border-t border-black/[0.05] dark:border-white/[0.06]">
         {task.assignee ? (
           <div className="flex items-center gap-1.5 min-w-0">
             <User className="h-3 w-3 text-slate-400 shrink-0" />
@@ -73,7 +72,7 @@ export function KanbanCard({ task, onClick }: { task: KanbanTaskData; onClick: (
             <span className="text-[10px] text-slate-400 italic">Unassigned</span>
           </div>
         )}
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-500 dark:text-slate-400">
           <Clock className="h-3 w-3 shrink-0" />
           <span>{lastActivity ? `Last activity ${formatDate(lastActivity)}` : "No activity"}</span>
         </div>

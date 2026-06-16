@@ -157,7 +157,7 @@ export function KanbanBoard({
   return (
     <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
       <SortableContext items={columnSortIds} strategy={horizontalListSortingStrategy}>
-        <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-4 px-1 h-full snap-x snap-mandatory scroll-smooth">
+        <div className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 px-1 h-full snap-x snap-mandatory scroll-smooth">
           {columns.map((column) => (
             <KanbanColumn
               key={column.id}
