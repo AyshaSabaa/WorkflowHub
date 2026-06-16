@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,6 +53,7 @@ export function TaskDetailDialog({
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [tab, setTab] = useState<"details" | "activity" | "attachments">("details");
+  const savedTitleRef = useRef("");
   const label = isDeal ? "Deal" : "Task";
 
   useEffect(() => {
@@ -60,13 +61,36 @@ export function TaskDetailDialog({
       setLoading(true);
       Promise.all([api.getTask(taskId), api.getUsers()])
         .then(([t, u]) => {
-          setTask((t as { task: TaskDetail }).task);
+          const loaded = (t as { task: TaskDetail }).task;
+          savedTitleRef.current = loaded.title;
+          setTask(loaded);
           setUsers((u as { users: { id: string; name: string }[] }).users);
         })
         .catch(() => toast.error(`Failed to load ${label.toLowerCase()}`))
         .finally(() => setLoading(false));
     }
   }, [open, taskId, isDeal]);
+
+  const saveTitle = async () => {
+    if (!task) return;
+    const trimmed = task.title.trim();
+    if (!trimmed) {
+      toast.error(`${label} title is required`);
+      setTask({ ...task, title: savedTitleRef.current });
+      return;
+    }
+    if (trimmed === savedTitleRef.current) return;
+    try {
+      await api.updateTask(task.id, { title: trimmed });
+      savedTitleRef.current = trimmed;
+      const data = await api.getTask(task.id) as { task: TaskDetail };
+      setTask(data.task);
+      onUpdate?.();
+    } catch {
+      toast.error("Update failed");
+      setTask({ ...task, title: savedTitleRef.current });
+    }
+  };
 
   const updateField = async (field: string, value: unknown) => {
     if (!task) return;
@@ -101,9 +125,27 @@ export function TaskDetailDialog({
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="max-w-4xl p-0 gap-0">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle>{loading ? "Loading..." : task?.title}</DialogTitle>
-          {task?.customer && <p className="text-sm text-[#0091ae]">{task.customer}</p>}
+        <DialogHeader className="p-6 pb-0 space-y-1">
+          {loading ? (
+            <DialogTitle>Loading...</DialogTitle>
+          ) : task ? (
+            <>
+              <DialogTitle className="text-lg font-semibold text-[#33475b] dark:text-white text-left">
+                {task.customer?.trim() || "No Customer Assigned"}
+              </DialogTitle>
+              <div>
+                <Label htmlFor="deal-title-header" className="sr-only">{label} Title</Label>
+                <Input
+                  id="deal-title-header"
+                  value={task.title}
+                  onChange={(e) => setTask({ ...task, title: e.target.value })}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                  className="mt-0.5 h-auto border-0 bg-transparent px-0 py-0 text-sm font-medium text-[#0091ae] shadow-none focus-visible:ring-0"
+                />
+              </div>
+            </>
+          ) : null}
         </DialogHeader>
         {loading ? (
           <div className="p-6 space-y-4"><Skeleton className="h-20 w-full" /><Skeleton className="h-40 w-full" /></div>
@@ -152,6 +194,16 @@ export function TaskDetailDialog({
               )}
             </div>
             <div className="w-full lg:w-64 p-6 bg-slate-50 dark:bg-slate-900/50 space-y-4">
+              <div>
+                <Label>{label} Title</Label>
+                <Input
+                  className="mt-1"
+                  value={task.title}
+                  onChange={(e) => setTask({ ...task, title: e.target.value })}
+                  onBlur={saveTitle}
+                  onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
+                />
+              </div>
               <div>
                 <Label>Deal Amount</Label>
                 <Input

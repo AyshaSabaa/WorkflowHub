@@ -68,7 +68,16 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       },
     });
 
-    if (data.assigneeId && data.assigneeId !== existing.assigneeId) {
+    const titleChanged = data.title !== undefined && data.title !== existing.title;
+
+    if (titleChanged) {
+      await logActivity({
+        taskId,
+        userId: user.id,
+        action: "TASK_UPDATED",
+        message: `Deal title changed from "${existing.title}" to "${data.title}"`,
+      });
+    } else if (data.assigneeId !== undefined && data.assigneeId !== existing.assigneeId) {
       await logActivity({ taskId, userId: user.id, action: "TASK_ASSIGNED", message: `${user.name} assigned task to ${task.assignee?.name || "someone"}` });
       if (data.assigneeId) {
         await createNotification({ userId: data.assigneeId, type: "ASSIGNMENT", title: "Task assigned", message: `You were assigned "${task.title}"`, link: `/boards/${task.boardId}?task=${taskId}` });

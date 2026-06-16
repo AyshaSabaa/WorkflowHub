@@ -72,9 +72,12 @@ export function KanbanCard({
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
-        <h4 className="text-sm font-semibold text-[#33475b] dark:text-white leading-snug line-clamp-2 hover:text-[#0091ae] transition-colors flex-1 min-w-0">
-          {task.title}
-        </h4>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-semibold text-[#33475b] dark:text-white leading-snug line-clamp-2 hover:text-[#0091ae] transition-colors">
+            {task.customer?.trim() || "No Customer Assigned"}
+          </h4>
+          <p className="text-[11px] font-medium text-[#0091ae] truncate mt-0.5">{task.title}</p>
+        </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -117,12 +120,6 @@ export function KanbanCard({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-
-      {task.customer ? (
-        <p className="text-[11px] font-medium text-[#0091ae] truncate mb-2">{task.customer}</p>
-      ) : (
-        <p className="text-[11px] text-slate-400 italic mb-2">No customer</p>
-      )}
 
       <div className="flex items-center gap-1.5 mb-2">
         <IndianRupee className="h-3.5 w-3.5 text-slate-500 dark:text-slate-400 shrink-0" />
